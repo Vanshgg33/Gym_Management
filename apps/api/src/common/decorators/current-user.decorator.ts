@@ -1,0 +1,16 @@
+import { createParamDecorator, ExecutionContext } from '@nestjs/common';
+
+export interface JwtPayload {
+  sub: string;
+  phone: string;
+  role: string;
+  name: string;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const CurrentUser = createParamDecorator(
+  (_data: unknown, ctx: ExecutionContext): JwtPayload => {
+    const request = ctx.switchToHttp().getRequest();
+    return request.user as JwtPayload;
+  },
+);
