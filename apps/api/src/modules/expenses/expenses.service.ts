@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Expense, ExpenseDocument } from './schemas/expense.schema.js';
 import { PettyCash, PettyCashDocument } from './schemas/petty-cash.schema.js';
 
@@ -11,11 +11,7 @@ export class ExpensesService {
     @InjectModel(PettyCash.name) private pettyCashModel: Model<PettyCashDocument>,
   ) {}
 
-  async findAll(filters: {
-    category?: string;
-    from?: Date;
-    to?: Date;
-  }) {
+  async findAll(filters: { category?: string; from?: Date; to?: Date }) {
     const query: Record<string, unknown> = {};
     if (filters.category) query.category = filters.category;
     if (filters.from || filters.to) {
@@ -27,32 +23,40 @@ export class ExpensesService {
   }
 
   async create(data: Partial<Expense>, actorId?: string) {
-    return this.expenseModel.create({ ...data, createdBy: actorId });
+    return this.expenseModel.create({
+      ...data,
+      addedById: actorId ? new Types.ObjectId(actorId) : undefined,
+    });
   }
 
-  async addPettyCash(data: Partial<PettyCash>) {
-    return this.pettyCashModel.create(data);
+  async addPettyCash(data: Partial<PettyCash>, actorId?: string) {
+    return this.pettyCashModel.create({
+      ...data,
+      entryType: 'top_up',
+      addedById: actorId ? new Types.ObjectId(actorId) : undefined,
+    });
   }
 
-  async getPettyCashBalance(): Promise<number> {
-    const result = await this.pettyCashModel.aggregate([
-      { $group: { _id: null, balance: { $sum: '$amountPaise' } } },
+  async getPettyCashBalance(): Promise<{ balance: number }> {
+    const topUps = await this.pettyCashModel.aggregate([
+      { $group: { _id: null, total: { $sum: '$amountInPaise' } } },
     ]);
-    return result[0]?.balance ?? 0;
+    const spent = await this.expenseModel.aggregate([
+      { $match: { fromPettyCash: true } },
+      { $group: { _id: null, total: { $sum: '$amountInPaise' } } },
+    ]);
+    const balance = (topUps[0]?.total ?? 0) - (spent[0]?.total ?? 0);
+    return { balance: Math.max(0, balance) };
   }
 
   async getCards() {
     const now = new Date();
     const startOfMonth = new Date(now.getUTCFullYear(), now.getUTCMonth(), 1);
-
-    const expenses = await this.expenseModel
-      .find({ date: { $gte: startOfMonth } })
-      .select('amountPaise')
-      .exec();
-
-    const totalThisMonth = expenses.reduce((sum, e) => sum + ((e as unknown as { amountPaise?: number }).amountPaise ?? 0), 0);
-    const pettyCashBalance = await this.getPettyCashBalance();
-
+    const [expenses, { balance: pettyCashBalance }] = await Promise.all([
+      this.expenseModel.find({ date: { $gte: startOfMonth } }).exec(),
+      this.getPettyCashBalance(),
+    ]);
+    const totalThisMonth = expenses.reduce((s, e) => s + (e.amountInPaise ?? 0), 0);
     return { totalThisMonth, pettyCashBalance, expenseCount: expenses.length };
   }
 }

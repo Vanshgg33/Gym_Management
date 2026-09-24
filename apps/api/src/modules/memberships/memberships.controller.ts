@@ -20,6 +20,11 @@ import type { JwtPayload } from '../../common/decorators/current-user.decorator.
 export class MembershipsController {
   constructor(private readonly membershipsService: MembershipsService) {}
 
+  @Get('dues')
+  getDues() {
+    return this.membershipsService.getDues();
+  }
+
   @Get('member/:memberId')
   findByMember(@Param('memberId') memberId: string) {
     return this.membershipsService.findByMemberId(memberId);

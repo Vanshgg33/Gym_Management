@@ -1,11 +1,4 @@
-﻿import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Query,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Query, UseGuards } from '@nestjs/common';
 import { ExpensesService } from './expenses.service.js';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../../common/guards/roles.guard.js';
@@ -18,6 +11,21 @@ import type { JwtPayload } from '../../common/decorators/current-user.decorator.
 @Roles('owner', 'manager')
 export class ExpensesController {
   constructor(private readonly expensesService: ExpensesService) {}
+
+  @Get('petty-cash/balance')
+  getPettyCashBalance() {
+    return this.expensesService.getPettyCashBalance();
+  }
+
+  @Post('petty-cash')
+  addPettyCash(@Body() body: Record<string, unknown>, @CurrentUser() user: JwtPayload) {
+    return this.expensesService.addPettyCash(body, user.sub);
+  }
+
+  @Get('cards')
+  getCards() {
+    return this.expensesService.getCards();
+  }
 
   @Get()
   findAll(
@@ -35,15 +43,5 @@ export class ExpensesController {
   @Post()
   create(@Body() body: Record<string, unknown>, @CurrentUser() user: JwtPayload) {
     return this.expensesService.create(body, user.sub);
-  }
-
-  @Get('petty-cash/balance')
-  getPettyCashBalance() {
-    return this.expensesService.getPettyCashBalance();
-  }
-
-  @Post('petty-cash')
-  addPettyCash(@Body() body: Record<string, unknown>) {
-    return this.expensesService.addPettyCash(body);
   }
 }

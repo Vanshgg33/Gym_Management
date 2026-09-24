@@ -370,4 +370,39 @@ export class MembershipsService {
     ]);
     return result[0]?.total ?? 0;
   }
+
+  async getDues(): Promise<{
+    dueToday: unknown[];
+    dueTo14Days: unknown[];
+    due15Plus: unknown[];
+    totalCount: number;
+  }> {
+    // Get all active memberships that have outstanding balance
+    const activeMemberships = await this.membershipModel
+      .find({ status: 'active' })
+      .populate('memberId', 'name phone code')
+      .exec();
+
+    const now = new Date();
+    const results: { membership: unknown; member: unknown; dueInPaise: number; daysOverdue: number }[] = [];
+
+    for (const m of activeMemberships) {
+      const paid = await this.getTotalPaid(m._id.toString());
+      const due = m.salePriceInPaise - paid;
+      if (due <= 0) continue;
+
+      const daysOverdue = Math.floor(
+        (now.getTime() - new Date(m.startDate).getTime()) / (1000 * 60 * 60 * 24),
+      );
+
+      results.push({ membership: m, member: m.memberId, dueInPaise: due, daysOverdue });
+    }
+
+    return {
+      dueToday: results.filter((r) => r.daysOverdue === 0),
+      dueTo14Days: results.filter((r) => r.daysOverdue >= 1 && r.daysOverdue <= 14),
+      due15Plus: results.filter((r) => r.daysOverdue > 14),
+      totalCount: results.length,
+    };
+  }
 }
