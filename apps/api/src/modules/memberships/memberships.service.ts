@@ -6,12 +6,34 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, ClientSession, Types } from 'mongoose';
 import { Membership, MembershipDocument } from './schemas/membership.schema.js';
+import { Member, MemberDocument } from '../members/schemas/member.schema.js';
+import { Payment, PaymentDocument } from '../payments/schemas/payment.schema.js';
+import { Invoice, InvoiceDocument } from '../payments/schemas/invoice.schema.js';
 import { AuditService } from '../audit/audit.service.js';
+
+interface SellPackageDto {
+  memberId: string;
+  packageId: string;
+  packageSnapshot: { name: string; type: string; priceInPaise: number; durationDays: number; sessions?: number };
+  salePriceInPaise: number;
+  startDate: Date;
+  endDate: Date;
+  trainerId?: string;
+  discountId?: string;
+  amountPayingInPaise: number;
+  paymentEntries: { method: string; amountInPaise: number; txRef?: string }[];
+  includeGst: boolean;
+  notes?: string;
+  actorId: string;
+}
 
 @Injectable()
 export class MembershipsService {
   constructor(
     @InjectModel(Membership.name) private membershipModel: Model<MembershipDocument>,
+    @InjectModel(Member.name) private memberModel: Model<MemberDocument>,
+    @InjectModel(Payment.name) private paymentModel: Model<PaymentDocument>,
+    @InjectModel(Invoice.name) private invoiceModel: Model<InvoiceDocument>,
     private auditService: AuditService,
   ) {}
 
@@ -277,8 +299,75 @@ export class MembershipsService {
       .exec();
   }
 
+  async sellPackage(dto: SellPackageDto) {
+    const member = await this.memberModel.findById(dto.memberId).exec();
+    if (!member) throw new NotFoundException('Member not found');
+
+    const today = new Date();
+    const status = new Date(dto.startDate) > today ? 'upcoming' : 'active';
+
+    const membership = await this.membershipModel.create({
+      memberId: new Types.ObjectId(dto.memberId),
+      packageId: new Types.ObjectId(dto.packageId),
+      packageSnapshot: dto.packageSnapshot,
+      salePriceInPaise: dto.salePriceInPaise,
+      startDate: dto.startDate,
+      endDate: dto.endDate,
+      status,
+      trainerId: dto.trainerId ? new Types.ObjectId(dto.trainerId) : undefined,
+      discountId: dto.discountId ? new Types.ObjectId(dto.discountId) : undefined,
+      sessionsTotal: dto.packageSnapshot.sessions ?? 0,
+    });
+
+    // Generate invoice
+    const invoiceNumber = `INV-${Date.now()}`;
+    const balanceInPaise = Math.max(0, dto.salePriceInPaise - dto.amountPayingInPaise);
+    const invoice = await this.invoiceModel.create({
+      invoiceNumber,
+      memberId: new Types.ObjectId(dto.memberId),
+      membershipId: membership._id,
+      salePriceInPaise: dto.salePriceInPaise,
+      paidInPaise: dto.amountPayingInPaise,
+      balanceInPaise,
+      includeGst: dto.includeGst,
+      paymentMethods: dto.paymentEntries.map((e) => e.method),
+      packageName: dto.packageSnapshot.name,
+      memberName: member.name,
+    });
+
+    let payment = null;
+    if (dto.amountPayingInPaise > 0) {
+      payment = await this.paymentModel.create({
+        membershipId: membership._id,
+        memberId: new Types.ObjectId(dto.memberId),
+        entries: dto.paymentEntries,
+        totalInPaise: dto.amountPayingInPaise,
+        date: new Date(),
+        invoiceId: invoice._id,
+        notes: dto.notes,
+      });
+    }
+
+    if (status === 'active') {
+      await this.memberModel.findByIdAndUpdate(dto.memberId, { status: 'active' });
+    }
+
+    await this.auditService.log({
+      actorId: dto.actorId,
+      action: 'membership.sold',
+      targetId: membership._id.toString(),
+      targetType: 'Membership',
+      after: { memberId: dto.memberId, packageName: dto.packageSnapshot.name, salePriceInPaise: dto.salePriceInPaise },
+    });
+
+    return { membership, invoice, payment };
+  }
+
   async getTotalPaid(membershipId: string): Promise<number> {
-    // ponytail: simplified — real impl aggregates payments collection
-    return 0;
+    const result = await this.paymentModel.aggregate([
+      { $match: { membershipId: new Types.ObjectId(membershipId), isDeleted: false } },
+      { $group: { _id: null, total: { $sum: '$totalInPaise' } } },
+    ]);
+    return result[0]?.total ?? 0;
   }
 }

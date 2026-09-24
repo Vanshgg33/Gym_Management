@@ -29,7 +29,26 @@ export class AttendanceController {
   }
 
   @Get()
-  findCurrentlyIn() {
+  findAll(
+    @Query('from') from?: string,
+    @Query('to') to?: string,
+    @Query('isStaff') isStaff?: string,
+  ) {
+    return this.attendanceService.findAll({
+      from: from ? new Date(from) : undefined,
+      to: to ? new Date(to) : undefined,
+      isStaff: isStaff !== undefined ? isStaff === 'true' : undefined,
+    });
+  }
+
+  @Get('today-count')
+  async getTodayCount() {
+    const count = await this.attendanceService.findTodayCount();
+    return { count };
+  }
+
+  @Get('currently-in')
+  getCurrentlyIn() {
     return this.attendanceService.findCurrentlyIn();
   }
 

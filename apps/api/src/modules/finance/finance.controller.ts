@@ -29,4 +29,9 @@ export class FinanceController {
   getCards(@Query('from') from: string, @Query('to') to: string) {
     return this.financeService.getCards(new Date(from), new Date(to));
   }
+
+  @Get('dashboard-stats')
+  getDashboardStats() {
+    return this.financeService.getDashboardStats();
+  }
 }

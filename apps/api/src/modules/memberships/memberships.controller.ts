@@ -61,4 +61,9 @@ export class MembershipsController {
   ) {
     return this.membershipsService.complete(id, body.adminNote, user.sub);
   }
+
+  @Post('sell')
+  sell(@Body() body: Record<string, unknown>, @CurrentUser() user: JwtPayload) {
+    return this.membershipsService.sellPackage({ ...(body as any), actorId: user.sub });
+  }
 }
