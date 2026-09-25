@@ -1,6 +1,5 @@
 {
-  "framework": "nextjs",
-  "installCommand": "npx pnpm@11.5.2 -C ../.. install",
+  "installCommand": "npx pnpm@11.5.2 install",
   "buildCommand": "next build",
   "outputDirectory": ".next"
 }
