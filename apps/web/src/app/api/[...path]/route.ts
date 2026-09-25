@@ -1,12 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 
 const API = process.env.API_URL ?? 'http://localhost:3001';
 
 async function proxy(req: NextRequest) {
   const url = new URL(req.url);
-  const target = `${API}${url.pathname}${url.search}`;
-
-  const res = await fetch(target, {
+  const upstream = await fetch(`${API}${url.pathname}${url.search}`, {
     method: req.method,
     headers: {
       'content-type': req.headers.get('content-type') ?? 'application/json',
@@ -15,17 +13,16 @@ async function proxy(req: NextRequest) {
     body: req.method === 'GET' || req.method === 'HEAD' ? undefined : await req.text(),
   });
 
-  const ct = res.headers.get('content-type') ?? '';
-  const body = ct.includes('application/json') ? await res.json() : await res.text();
+  const body = await upstream.arrayBuffer();
 
-  const out = ct.includes('application/json')
-    ? NextResponse.json(body, { status: res.status })
-    : new NextResponse(body as string, { status: res.status, headers: { 'content-type': ct } });
+  // Copy all upstream headers (including set-cookie) into a fresh Headers object.
+  // transfer-encoding is stripped because we've already buffered the body.
+  const headers = new Headers();
+  upstream.headers.forEach((value, key) => {
+    if (key !== 'transfer-encoding') headers.append(key, value);
+  });
 
-  const setCookie = res.headers.get('set-cookie');
-  if (setCookie) out.headers.set('set-cookie', setCookie);
-
-  return out;
+  return new Response(body, { status: upstream.status, headers });
 }
 
 export const GET = proxy;
