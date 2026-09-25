@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, ClientSession } from 'mongoose';
+import { Model, ClientSession, Types } from 'mongoose';
 import { Payment, PaymentDocument } from './schemas/payment.schema.js';
 import { Invoice, InvoiceDocument } from './schemas/invoice.schema.js';
 import { AuditService } from '../audit/audit.service.js';
@@ -14,11 +14,17 @@ export class PaymentsService {
   ) {}
 
   async findByMembershipId(membershipId: string) {
-    return this.paymentModel.find({ membershipId }).sort({ createdAt: -1 }).exec();
+    return this.paymentModel
+      .find({ membershipId: new Types.ObjectId(membershipId) })
+      .sort({ date: -1 })
+      .exec();
   }
 
   async findByMemberId(memberId: string) {
-    return this.paymentModel.find({ memberId }).sort({ createdAt: -1 }).exec();
+    return this.paymentModel
+      .find({ memberId: new Types.ObjectId(memberId) })
+      .sort({ date: -1 })
+      .exec();
   }
 
   async create(data: Partial<Payment>, session?: ClientSession) {

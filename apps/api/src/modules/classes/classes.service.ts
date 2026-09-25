@@ -12,7 +12,7 @@ export class ClassesService {
   ) {}
 
   async findAll() {
-    return this.classModel.find({ isArchived: false }).sort({ createdAt: -1 }).exec();
+    return this.classModel.find({ isActive: true }).sort({ createdAt: -1 }).exec();
   }
 
   async findById(id: string) {

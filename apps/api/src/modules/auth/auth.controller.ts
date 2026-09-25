@@ -2,8 +2,8 @@ import { Controller, Post, Body, Res, UseGuards, Get } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import type { Response } from 'express';
 import { AuthService } from './auth.service.js';
-import { SendOtpDto } from './dto/send-otp.dto.js';
-import { VerifyOtpDto } from './dto/verify-otp.dto.js';
+import { LoginDto } from './dto/login.dto.js';
+import { RegisterDto } from './dto/register.dto.js';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard.js';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import type { JwtPayload } from '../../common/decorators/current-user.decorator.js';
@@ -12,16 +12,16 @@ import type { JwtPayload } from '../../common/decorators/current-user.decorator.
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('send-otp')
+  @Post('register')
   @Throttle({ auth: { ttl: 60_000, limit: 5 } })
-  sendOtp(@Body() dto: SendOtpDto) {
-    return this.authService.sendOtp(dto);
+  register(@Body() dto: RegisterDto, @Res({ passthrough: true }) res: Response) {
+    return this.authService.register(dto, res);
   }
 
-  @Post('verify-otp')
+  @Post('login')
   @Throttle({ auth: { ttl: 60_000, limit: 10 } })
-  verifyOtp(@Body() dto: VerifyOtpDto, @Res({ passthrough: true }) res: Response) {
-    return this.authService.verifyOtp(dto, res);
+  login(@Body() dto: LoginDto, @Res({ passthrough: true }) res: Response) {
+    return this.authService.login(dto, res);
   }
 
   @Post('logout')

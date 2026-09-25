@@ -4,7 +4,6 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AuthController } from './auth.controller.js';
 import { AuthService } from './auth.service.js';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard.js';
-import { OtpStore, OtpStoreSchema } from './schemas/otp-store.schema.js';
 import { User, UserSchema } from '../users/schemas/user.schema.js';
 
 @Global()
@@ -15,7 +14,6 @@ import { User, UserSchema } from '../users/schemas/user.schema.js';
       signOptions: { expiresIn: '15m' },
     }),
     MongooseModule.forFeature([
-      { name: OtpStore.name, schema: OtpStoreSchema },
       { name: User.name, schema: UserSchema },
     ]),
   ],

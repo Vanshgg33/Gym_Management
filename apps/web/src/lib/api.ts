@@ -7,7 +7,7 @@ async function request(path: string, init: RequestInit = {}) {
     headers: { 'Content-Type': 'application/json', ...init.headers },
   });
 
-  if (res.status === 401 && typeof window !== 'undefined') {
+  if (res.status === 401 && typeof window !== 'undefined' && window.location.pathname !== '/login') {
     window.location.href = '/login';
     return;
   }

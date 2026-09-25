@@ -1,7 +1,49 @@
-﻿node_modules/
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+.next/
+out/
+build/
+
+# Turbo cache
+.turbo/
+
+# Environment files
 .env
 .env.local
-.next/
-dist/
-.turbo/
+.env.*.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
 *.log
+logs/
+api_stdout.log
+api_stderr.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# MongoDB memory server binaries
+.cache/
+apps/api/.mongodb-binaries/
+
+# pnpm
+.pnpm-store/
+
+# TypeScript
+*.tsbuildinfo

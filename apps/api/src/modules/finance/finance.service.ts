@@ -15,10 +15,11 @@ export class FinanceService {
 
   async getRevenueData(from: Date, to: Date, filters: Record<string, unknown> = {}) {
     const query: Record<string, unknown> = {
-      createdAt: { $gte: from, $lte: to },
+      date: { $gte: from, $lte: to },  // payments use 'date' field
+      isDeleted: false,
       ...filters,
     };
-    return this.paymentModel.find(query).sort({ createdAt: -1 }).exec();
+    return this.paymentModel.find(query).sort({ date: -1 }).exec();
   }
 
   async getSalesData(from: Date, to: Date, filters: Record<string, unknown> = {}) {

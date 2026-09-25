@@ -9,12 +9,12 @@ export async function getMe() {
   }
 }
 
-export function sendOtp(phone: string) {
-  return api.post('/api/auth/send-otp', { phone });
+export function login(email: string, password: string) {
+  return api.post('/api/auth/login', { email, password });
 }
 
-export function verifyOtp(phone: string, otp: string) {
-  return api.post('/api/auth/verify-otp', { phone, otp });
+export function register(name: string, email: string, password: string) {
+  return api.post('/api/auth/register', { name, email, password });
 }
 
 export async function logout() {

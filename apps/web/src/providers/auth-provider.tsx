@@ -5,7 +5,7 @@ import { getMe } from '@/lib/auth';
 
 export interface JwtUser {
   id: string;
-  phone: string;
+  email: string;
   role: string;
   name: string;
 }

@@ -1,4 +1,4 @@
-import { Controller, Get, Put, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Put, Patch, Body, UseGuards } from '@nestjs/common';
 import { SettingsService } from './settings.service.js';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard.js';
 import { Roles } from '../../common/decorators/roles.decorator.js';
@@ -17,7 +17,13 @@ export class SettingsController {
 
   @Put()
   @Roles('owner')
-  update(@Body() body: Record<string, unknown>) {
+  put(@Body() body: Record<string, unknown>) {
+    return this.settingsService.update(body as any);
+  }
+
+  @Patch()
+  @Roles('owner', 'manager')
+  patch(@Body() body: Record<string, unknown>) {
     return this.settingsService.update(body as any);
   }
 }

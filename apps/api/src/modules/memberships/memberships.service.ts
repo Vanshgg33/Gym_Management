@@ -56,7 +56,6 @@ export class MembershipsService {
       .findOne({
         memberId: new Types.ObjectId(memberId),
         status: { $in: ['active', 'upcoming'] },
-        startDate: { $lte: today },
         endDate: { $gte: today },
       })
       .exec();
@@ -178,10 +177,13 @@ export class MembershipsService {
         newEndDate.setDate(newEndDate.getDate() - remainingDays);
       }
 
+      const lastIdx = membership.freezes.length - 1;
       await this.membershipModel.findByIdAndUpdate(id, {
-        status: 'active',
-        endDate: newEndDate,
-        'freezes.$[last].unfrozenAt': new Date(),
+        $set: {
+          status: 'active',
+          endDate: newEndDate,
+          [`freezes.${lastIdx}.unfrozenAt`]: new Date(),
+        },
       });
     } else {
       await this.membershipModel.findByIdAndUpdate(id, { status: 'active' });
@@ -303,8 +305,12 @@ export class MembershipsService {
     const member = await this.memberModel.findById(dto.memberId).exec();
     if (!member) throw new NotFoundException('Member not found');
 
-    const today = new Date();
-    const status = new Date(dto.startDate) > today ? 'upcoming' : 'active';
+    // Compare calendar dates in IST — a membership starting "today" is immediately active
+    const startDay = new Date(dto.startDate);
+    startDay.setUTCHours(0, 0, 0, 0);
+    const todayDay = new Date();
+    todayDay.setUTCHours(0, 0, 0, 0);
+    const status = startDay > todayDay ? 'upcoming' : 'active';
 
     const membership = await this.membershipModel.create({
       memberId: new Types.ObjectId(dto.memberId),
