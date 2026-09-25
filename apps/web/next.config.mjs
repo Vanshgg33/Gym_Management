@@ -1,7 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // NEXT_PUBLIC_API_URL env var is read at build time from .env.local
-  // Default: http://localhost:3001
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: `${process.env.API_URL ?? 'http://localhost:3001'}/api/:path*`,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

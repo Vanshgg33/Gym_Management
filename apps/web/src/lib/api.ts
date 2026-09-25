@@ -1,4 +1,6 @@
-const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
+const BASE = typeof window === 'undefined'
+  ? (process.env.API_URL ?? 'http://localhost:3001')
+  : '';
 
 async function request(path: string, init: RequestInit = {}) {
   const res = await fetch(`${BASE}${path}`, {
