@@ -104,7 +104,7 @@ export default function MembersPage() {
     queryKey: ['members', search, effectiveStatus, gender, showArchived],
     queryFn: () =>
       api.get(
-        `/api/members?search=${encodeURIComponent(search)}&status=${effectiveStatus}&gender=${gender}&isArchived=${showArchived}`
+        `/members?search=${encodeURIComponent(search)}&status=${effectiveStatus}&gender=${gender}&isArchived=${showArchived}`
       ),
   })
 
