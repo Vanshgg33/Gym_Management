@@ -566,7 +566,7 @@ function StaffTab() {
 
   const { data: staff = [], isLoading } = useQuery<StaffUser[]>({
     queryKey: ['staff', search, showArchived],
-    queryFn: () => api.get(`/staff?search=${encodeURIComponent(search)}&isArchived=${showArchived}`),
+    queryFn: () => api.get(`/staff?includeArchived=${showArchived}`),
   })
 
   const filtered = staff.filter(s =>

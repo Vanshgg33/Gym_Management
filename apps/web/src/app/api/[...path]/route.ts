@@ -9,6 +9,7 @@ async function proxy(req: NextRequest) {
     headers: {
       'content-type': req.headers.get('content-type') ?? 'application/json',
       cookie: req.headers.get('cookie') ?? '',
+      'accept-encoding': 'identity',
     },
     body: req.method === 'GET' || req.method === 'HEAD' ? undefined : await req.text(),
   });
