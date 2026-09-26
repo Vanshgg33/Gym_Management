@@ -19,7 +19,7 @@ async function proxy(req: NextRequest) {
   // transfer-encoding is stripped because we've already buffered the body.
   const headers = new Headers();
   upstream.headers.forEach((value, key) => {
-    if (key !== 'transfer-encoding') headers.append(key, value);
+    if (key !== 'transfer-encoding' && key !== 'content-encoding') headers.append(key, value);
   });
 
   return new Response(body, { status: upstream.status, headers });
