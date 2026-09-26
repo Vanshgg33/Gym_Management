@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import Link from 'next/link'
@@ -99,17 +99,17 @@ export default function DashboardPage() {
 
   const { data: activeMembers, isLoading: loadingMembers } = useQuery({
     queryKey: ['members', 'active'],
-    queryFn: () => api.get('/api/members?status=active'),
+    queryFn: () => api.get('/members?status=active'),
   })
 
   const { data: allMembers, isLoading: loadingAll } = useQuery({
     queryKey: ['members', 'all'],
-    queryFn: () => api.get('/api/members'),
+    queryFn: () => api.get('/members'),
   })
 
   const { data: attendance, isLoading: loadingAttendance } = useQuery({
     queryKey: ['attendance', 'today'],
-    queryFn: () => api.get(`/api/attendance?date=${todayISO()}`),
+    queryFn: () => api.get(`/attendance?date=${todayISO()}`),
   })
 
   const pStart = periodStart(period)

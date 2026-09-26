@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useCallback } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -82,13 +82,13 @@ function AddModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: () =
 
   const { data: results = [] } = useQuery<Member[]>({
     queryKey: ['member-search', debouncedQ],
-    queryFn: () => api.get(`/api/members?search=${encodeURIComponent(debouncedQ)}`),
+    queryFn: () => api.get(`/members?search=${encodeURIComponent(debouncedQ)}`),
     enabled: debouncedQ.length >= 2,
   })
 
   const mutation = useMutation({
     mutationFn: () =>
-      api.post('/api/followups', {
+      api.post('/followups', {
         contactId: selected!._id,
         contactType: 'member',
         subject,
@@ -221,7 +221,7 @@ function AddModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: () =
 function CompleteModal({ followup, onClose, onSuccess }: { followup: FollowUp; onClose: () => void; onSuccess: () => void }) {
   const [note, setNote] = useState('')
   const mutation = useMutation({
-    mutationFn: () => api.post(`/api/followups/${followup._id}/complete`, { closingNote: note }),
+    mutationFn: () => api.post(`/followups/${followup._id}/complete`, { closingNote: note }),
     onSuccess,
   })
 
@@ -286,7 +286,7 @@ export default function FollowupsPage() {
 
   const { data: followups = [], isLoading } = useQuery<FollowUp[]>({
     queryKey: ['followups', typeFilter, from, to],
-    queryFn: () => api.get(`/api/followups?${qs.toString()}`),
+    queryFn: () => api.get(`/followups?${qs.toString()}`),
   })
 
   const today = new Date().toISOString().slice(0, 10)

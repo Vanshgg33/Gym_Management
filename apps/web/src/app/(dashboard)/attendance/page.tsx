@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useCallback } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -81,13 +81,13 @@ function CheckInModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: 
 
   const { data: results = [] } = useQuery<Member[]>({
     queryKey: ['member-search', debouncedQ],
-    queryFn: () => api.get(`/api/members?search=${encodeURIComponent(debouncedQ)}`),
+    queryFn: () => api.get(`/members?search=${encodeURIComponent(debouncedQ)}`),
     enabled: debouncedQ.length >= 2,
   })
 
   const mutation = useMutation({
     mutationFn: () =>
-      api.post('/api/attendance/checkin', {
+      api.post('/attendance/checkin', {
         memberId: selected!._id,
         checkIn: new Date(checkIn).toISOString(),
         ...(checkOut ? { checkOut: new Date(checkOut).toISOString() } : {}),
@@ -219,7 +219,7 @@ export default function AttendancePage() {
 
   const { data: records = [], isLoading } = useQuery<AttendanceRecord[]>({
     queryKey: ['attendance', from, to, isStaff],
-    queryFn: () => api.get(`/api/attendance?from=${from}&to=${to}&isStaff=${isStaff}`),
+    queryFn: () => api.get(`/attendance?from=${from}&to=${to}&isStaff=${isStaff}`),
   })
 
   // Filtered by search client-side (name/code)

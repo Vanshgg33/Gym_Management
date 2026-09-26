@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
@@ -206,9 +206,9 @@ function PackageModal({
     }
     try {
       if (initial) {
-        await api.patch(`/api/packages/${initial.id}`, body)
+        await api.patch(`/packages/${initial.id}`, body)
       } else {
-        await api.post('/api/packages', body)
+        await api.post('/packages', body)
       }
       onSaved()
     } catch (err: unknown) {
@@ -402,9 +402,9 @@ function DiscountModal({
     }
     try {
       if (initial) {
-        await api.patch(`/api/packages/discounts/${initial.id}`, body)
+        await api.patch(`/packages/discounts/${initial.id}`, body)
       } else {
-        await api.post('/api/packages/discounts', body)
+        await api.post('/packages/discounts', body)
       }
       onSaved()
     } catch (err: unknown) {
@@ -514,12 +514,12 @@ export default function PackagesPage() {
 
   const { data: packages, isLoading: loadingPkgs } = useQuery<Package[]>({
     queryKey: ['packages'],
-    queryFn: () => api.get('/api/packages'),
+    queryFn: () => api.get('/packages'),
   })
 
   const { data: discounts, isLoading: loadingDiscounts } = useQuery<Discount[]>({
     queryKey: ['discounts'],
-    queryFn: () => api.get('/api/packages/discounts'),
+    queryFn: () => api.get('/packages/discounts'),
   })
 
   function invalidatePkgs() { qc.invalidateQueries({ queryKey: ['packages'] }) }
@@ -527,12 +527,12 @@ export default function PackagesPage() {
 
   async function archivePkg(id: string) {
     if (!confirm('Archive this package?')) return
-    await api.patch(`/api/packages/${id}/archive`, {})
+    await api.patch(`/packages/${id}/archive`, {})
     invalidatePkgs()
   }
 
   async function toggleOnline(id: string, val: boolean) {
-    await api.patch(`/api/packages/${id}`, { isOnline: val })
+    await api.patch(`/packages/${id}`, { isOnline: val })
     invalidatePkgs()
   }
 

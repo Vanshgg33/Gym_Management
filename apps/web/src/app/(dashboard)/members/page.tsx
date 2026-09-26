@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
@@ -252,7 +252,7 @@ export default function MembersPage() {
                       </button>
                       <button
                         onClick={() =>
-                          api.patch(`/api/members/${m._id}/archive`, {}).then(() =>
+                          api.patch(`/members/${m._id}/archive`, {}).then(() =>
                             queryClient.invalidateQueries({ queryKey: ['members'] })
                           )
                         }

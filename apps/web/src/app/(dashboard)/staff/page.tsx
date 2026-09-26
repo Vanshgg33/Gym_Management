@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -81,7 +81,7 @@ function AddStaffModal({ onClose, onSuccess }: { onClose: () => void; onSuccess:
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   const mutation = useMutation({
-    mutationFn: () => api.post('/api/staff', {
+    mutationFn: () => api.post('/staff', {
       name: form.name.trim(),
       phone: `+91${form.phone.trim()}`,
       role: form.role,
@@ -223,7 +223,7 @@ function EditStaffModal({ staff, onClose, onSuccess }: { staff: StaffUser; onClo
   })
 
   const mutation = useMutation({
-    mutationFn: () => api.patch(`/api/staff/${staff._id}`, {
+    mutationFn: () => api.patch(`/staff/${staff._id}`, {
       name: form.name.trim(),
       role: form.role,
       specialisation: form.specialisation.trim() || undefined,
@@ -332,7 +332,7 @@ function CreateClassModal({ onClose, onSuccess }: { onClose: () => void; onSucce
   })
 
   const mutation = useMutation({
-    mutationFn: () => api.post('/api/classes', form),
+    mutationFn: () => api.post('/classes', form),
     onSuccess,
   })
 
@@ -566,7 +566,7 @@ function StaffTab() {
 
   const { data: staff = [], isLoading } = useQuery<StaffUser[]>({
     queryKey: ['staff', search, showArchived],
-    queryFn: () => api.get(`/api/staff?search=${encodeURIComponent(search)}&isArchived=${showArchived}`),
+    queryFn: () => api.get(`/staff?search=${encodeURIComponent(search)}&isArchived=${showArchived}`),
   })
 
   const filtered = staff.filter(s =>
@@ -577,7 +577,7 @@ function StaffTab() {
   const activeCount = staff.filter(s => s.isActive && !s.isArchived).length
 
   function handleArchive(id: string) {
-    api.patch(`/api/staff/${id}/archive`, {}).then(() =>
+    api.patch(`/staff/${id}/archive`, {}).then(() =>
       queryClient.invalidateQueries({ queryKey: ['staff'] })
     )
   }
@@ -796,7 +796,7 @@ function ClassesTab() {
 
   const { data: classes = [], isLoading } = useQuery<GymClass[]>({
     queryKey: ['classes'],
-    queryFn: () => api.get('/api/classes'),
+    queryFn: () => api.get('/classes'),
     enabled: subTab === 'Class Types',
   })
 

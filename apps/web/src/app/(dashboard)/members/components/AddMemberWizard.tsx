@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useRef } from 'react'
 import { useQuery } from '@tanstack/react-query'
@@ -147,7 +147,7 @@ export function AddMemberWizard({ isOpen, onClose, onSuccess }: Props) {
 
   const { data: packages = [] } = useQuery<Package[]>({
     queryKey: ['packages'],
-    queryFn: () => api.get('/api/packages'),
+    queryFn: () => api.get('/packages'),
     enabled: isOpen,
   })
 
@@ -230,12 +230,12 @@ export function AddMemberWizard({ isOpen, onClose, onSuccess }: Props) {
         ...(notes1 && { notes: notes1 }),
         memberType,
       }
-      const member = await api.post('/api/members', memberBody)
+      const member = await api.post('/members', memberBody)
       const memberId: string = member._id ?? member.id
 
       if (memberType === 'member' && packageId && selectedPkg) {
         // 2. Create membership
-        const membership = await api.post('/api/memberships', {
+        const membership = await api.post('/memberships', {
           memberId,
           packageId,
           packageSnapshot: selectedPkg,
@@ -247,7 +247,7 @@ export function AddMemberWizard({ isOpen, onClose, onSuccess }: Props) {
 
         // 3. Payment if > 0
         if (payingNowPaise > 0) {
-          await api.post('/api/payments', {
+          await api.post('/payments', {
             membershipId,
             memberId,
             entries: [{ method: payMethod, amountInPaise: payingNowPaise, ...(txRef && { txRef }) }],

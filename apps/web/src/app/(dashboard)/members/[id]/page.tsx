@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
@@ -106,7 +106,7 @@ function ProfileTab({ member, onSaved }: { member: Member; onSaved: () => void }
   const qc = useQueryClient()
 
   const save = useMutation({
-    mutationFn: () => api.patch(`/api/members/${member._id}`, form),
+    mutationFn: () => api.patch(`/members/${member._id}`, form),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['member', member._id] }); setEditing(false); onSaved() },
   })
 
@@ -212,7 +212,7 @@ function ProfileTab({ member, onSaved }: { member: Member; onSaved: () => void }
 function MembershipsTab({ memberId }: { memberId: string }) {
   const { data: memberships = [], isLoading } = useQuery<Membership[]>({
     queryKey: ['memberships', memberId],
-    queryFn: () => api.get(`/api/memberships/member/${memberId}`),
+    queryFn: () => api.get(`/memberships/member/${memberId}`),
   })
 
   if (isLoading) return <div className="animate-pulse space-y-3">{[1, 2].map(i => <div key={i} className="h-16 rounded-xl bg-gray-200 dark:bg-gray-700" />)}</div>
@@ -258,7 +258,7 @@ function MembershipsTab({ memberId }: { memberId: string }) {
 function AttendanceTab({ memberId }: { memberId: string }) {
   const { data: records = [], isLoading } = useQuery<AttendanceRecord[]>({
     queryKey: ['attendance', memberId],
-    queryFn: () => api.get(`/api/attendance/member/${memberId}`),
+    queryFn: () => api.get(`/attendance/member/${memberId}`),
   })
 
   if (isLoading) return <div className="animate-pulse space-y-3">{[1, 2, 3].map(i => <div key={i} className="h-12 rounded-xl bg-gray-200 dark:bg-gray-700" />)}</div>
@@ -318,15 +318,15 @@ export default function MemberDetailPage() {
 
   const { data: member, isLoading } = useQuery<Member>({
     queryKey: ['member', id],
-    queryFn: () => api.get(`/api/members/${id}`),
+    queryFn: () => api.get(`/members/${id}`),
     enabled: !!id,
   })
 
   const archiveMutation = useMutation({
     mutationFn: () =>
       member?.isArchived
-        ? api.patch(`/api/members/${id}/restore`, {})
-        : api.patch(`/api/members/${id}/archive`, {}),
+        ? api.patch(`/members/${id}/restore`, {})
+        : api.patch(`/members/${id}/archive`, {}),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['member', id] }),
   })
 

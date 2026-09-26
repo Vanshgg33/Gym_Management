@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -251,7 +251,7 @@ export default function SettingsPage() {
 
   const { data: settings = {} as GymSettings } = useQuery<GymSettings>({
     queryKey: ['settings'],
-    queryFn: () => api.get('/api/settings'),
+    queryFn: () => api.get('/settings'),
   })
 
   const [gymName, setGymName] = useState('')
@@ -284,7 +284,7 @@ export default function SettingsPage() {
   }, [settings.gymName]) // ponytail: fires once when data lands; re-fetches don't reset user edits
 
   const generalMutation = useMutation({
-    mutationFn: () => api.patch('/api/settings', {
+    mutationFn: () => api.patch('/settings', {
       gymName, email, phone, address, city,
       memberIdPrefix: prefix,
       termsAndConditions: terms,
@@ -294,7 +294,7 @@ export default function SettingsPage() {
   })
 
   const taxMutation = useMutation({
-    mutationFn: () => api.patch('/api/settings', { gstNumber: gst, sgst, cgst }),
+    mutationFn: () => api.patch('/settings', { gstNumber: gst, sgst, cgst }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['settings'] }),
   })
 

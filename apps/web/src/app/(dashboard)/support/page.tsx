@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -98,7 +98,7 @@ function TicketModal({
 
   const mutation = useMutation({
     mutationFn: () =>
-      api.post('/api/support/tickets', { subject, category, priority, description, ticketType }),
+      api.post('/support/tickets', { subject, category, priority, description, ticketType }),
     onSuccess: () => { onSuccess(); onClose() },
     onError: (e: Error) => setError(e.message),
   })
@@ -162,7 +162,7 @@ function ViewModal({ ticket, onClose }: { ticket: Ticket; onClose: () => void })
 
   const replyMutation = useMutation({
     mutationFn: () =>
-      api.post(`/api/support/tickets/${ticket._id}/reply`, { authorId: 'me', authorName: 'Me', body: replyBody }),
+      api.post(`/support/tickets/${ticket._id}/reply`, { authorId: 'me', authorName: 'Me', body: replyBody }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tickets'] })
       setReplyBody('')
@@ -171,7 +171,7 @@ function ViewModal({ ticket, onClose }: { ticket: Ticket; onClose: () => void })
   })
 
   const resolveMutation = useMutation({
-    mutationFn: () => api.patch(`/api/support/tickets/${ticket._id}`, { status: 'resolved' }),
+    mutationFn: () => api.patch(`/support/tickets/${ticket._id}`, { status: 'resolved' }),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['tickets'] }); onClose() },
   })
 
@@ -266,7 +266,7 @@ function TicketTable({ ticketType }: { ticketType: 'platform' | 'internal' }) {
 
   const { data: tickets = [], isLoading } = useQuery<Ticket[]>({
     queryKey: ['tickets', ticketType],
-    queryFn: () => api.get(`/api/support/tickets?ticketType=${ticketType}`),
+    queryFn: () => api.get(`/support/tickets?ticketType=${ticketType}`),
   })
 
   const filtered = statusFilter === 'All'
